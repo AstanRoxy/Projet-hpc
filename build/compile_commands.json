@@ -1,0 +1,86 @@
+[
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\main.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\main.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/main.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/main.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\solver_sequential.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\solver_sequential.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/solver_sequential.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/solver_sequential.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\solver.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\solver.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/solver.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/solver.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\grid.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\grid.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/grid.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/grid.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\boundary.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\boundary.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/boundary.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/boundary.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\timer.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\timer.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/timer.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/timer.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe -DSEQUENTIAL @CMakeFiles/heat_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\heat_seq.dir\\src\\config.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\config.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/config.cpp",
+  "output": "CMakeFiles/heat_seq.dir/src/config.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\tests\\test_sequential.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\tests\\test_sequential.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/tests/test_sequential.cpp",
+  "output": "CMakeFiles/test_seq.dir/tests/test_sequential.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\src\\solver_sequential.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\solver_sequential.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/solver_sequential.cpp",
+  "output": "CMakeFiles/test_seq.dir/src/solver_sequential.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\src\\solver.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\solver.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/solver.cpp",
+  "output": "CMakeFiles/test_seq.dir/src/solver.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\src\\grid.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\grid.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/grid.cpp",
+  "output": "CMakeFiles/test_seq.dir/src/grid.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\src\\boundary.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\boundary.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/boundary.cpp",
+  "output": "CMakeFiles/test_seq.dir/src/boundary.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\src\\timer.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\timer.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/timer.cpp",
+  "output": "CMakeFiles/test_seq.dir/src/timer.cpp.obj"
+},
+{
+  "directory": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/test_seq.dir/includes_CXX.rsp -g -std=c++1z -Wall -Wextra -O3 -march=native -ffast-math -o CMakeFiles\\test_seq.dir\\src\\config.cpp.obj -c C:\\Users\\HP\\OneDrive\\Desktop\\Assi\\MasterIngenierieLogicielle\\Semestre3\\HPC\\Skeleton-Code-main\\src\\config.cpp",
+  "file": "C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/src/config.cpp",
+  "output": "CMakeFiles/test_seq.dir/src/config.cpp.obj"
+}
+]

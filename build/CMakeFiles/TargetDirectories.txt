@@ -1,0 +1,4 @@
+C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build/CMakeFiles/heat_seq.dir
+C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build/CMakeFiles/test_seq.dir
+C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build/CMakeFiles/edit_cache.dir
+C:/Users/HP/OneDrive/Desktop/Assi/MasterIngenierieLogicielle/Semestre3/HPC/Skeleton-Code-main/build/CMakeFiles/rebuild_cache.dir
