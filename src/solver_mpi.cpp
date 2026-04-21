@@ -12,6 +12,7 @@ MPISolver::MPISolver() : Solver(),
     recv_buffer_left(nullptr), recv_buffer_right(nullptr),
     recv_buffer_bottom(nullptr), recv_buffer_top(nullptr) {
     
+        //determiner le nombre de processeur
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 }
@@ -36,36 +37,77 @@ MPISolver::~MPISolver() {
 }
 
 void MPISolver::setup_cartesian_communicator() {
-    // TODO: Create a 2D Cartesian communicator
-    // 1. Determine grid dimensions for processes (try to make it square)
+    // 1. Determine grid dimensions (dims[0] * dims[1] = size)
+    int dims[2] = {0, 0}; 
+    
     // 2. Use MPI_Dims_create to create a balanced decomposition
+    MPI_Dims_create(size, 2, dims); 
+
     // 3. Use MPI_Cart_create to create the communicator
+    int periods[2] = {0, 0}; 
+    MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 1, &cart_comm);
+
     // 4. Use MPI_Cart_coords to get coordinates for this rank
+    MPI_Cart_coords(cart_comm, rank, 2, coords);
+
     // 5. Use MPI_Cart_shift to find neighbors in each direction
+    MPI_Cart_shift(cart_comm, 0, 1, &neighbors[0], &neighbors[1]); // left, right
+    MPI_Cart_shift(cart_comm, 1, 1, &neighbors[2], &neighbors[3]); // bottom, top
 }
 
+
 void MPISolver::initialize(const SimulationParams& params) {
-    // TODO: Initialize MPI solver
     // 1. Store global dimensions
-    // 2. Set up Cartesian communicator
-    // 3. Calculate local grid dimensions (including halos)
-    // 4. Allocate local grids
-    // 5. Initialize local grid with appropriate part of global initial condition
-    // 6. Allocate send/receive buffers
-    // 7. Initialize base solver parameters (dx, dy, dt, factor)
-    
+
     global_nx = params.Nx;
     global_ny = params.Ny;
-    
+
+    // 2. Set up Cartesian communicator (appel de la fonction ci-dessus)
     setup_cartesian_communicator();
+
+    // 3. Récupérer les dimensions de la grille de processeurs
+    int dims[2], periods[2], coords[2];
+    MPI_Cart_get(cart_comm, 2, dims, periods, coords);
+
+    // 3. Calculate local grid dimensions (including halos)
+    local_nx = (global_nx / dims[0]) + 2; 
+    local_ny = (global_ny / dims[1]) + 2;
+
+    // 4. Allocate local grids
+    local_grid_old = new Grid(local_nx, local_ny);
+    local_grid_new = new Grid(local_nx, local_ny);
+    local_grid_old->fill(params.T_initial);
+
+    // 5. Initialize local grid with appropriate part of global initial condition
+
+    local_grid_old->fill(0.0);
+
+    // 6. Allocate send/receive buffers (pour les colonnes non contiguës)
+    send_buffer_left = new double[local_ny - 2];
+    send_buffer_right = new double[local_ny - 2];
+    recv_buffer_left = new double[local_ny - 2];
+    recv_buffer_right = new double[local_ny - 2];
+
+    // 7. Initialize base solver parameters
+    this->dx = params.Lx / params.Nx;
+    this->dy = params.Ly / params.Ny;
+    this->dt = 0.5 * (dx * dx) / params.alpha; // Condition de stabilité CFL
+    this->alpha = params.alpha;
+    this->factor = this->alpha * dt / (dx * dx); 
+}
+    
+   //// global_nx = params.Nx;
+   // //global_ny = params.Ny;
+    
+    ////setup_cartesian_communicator();
     
     // Calculate local dimensions including halos
     // local_nx = (global_nx / dims[0]) + 2;  // +2 for halos
     // local_ny = (global_ny / dims[1]) + 2;
     
     // Allocate local grids
-    local_grid_old = new Grid(local_nx, local_ny);
-    local_grid_new = new Grid(local_nx, local_ny);
+   //// local_grid_old = new Grid(local_nx, local_ny);
+   //// local_grid_new = new Grid(local_nx, local_ny);
     
     // Initialize local grid from global initial condition
     // This requires mapping global indices to local indices
@@ -73,7 +115,7 @@ void MPISolver::initialize(const SimulationParams& params) {
     // Allocate communication buffers
     // send_buffer_left = new double[local_ny-2];
     // etc.
-}
+
 
 void MPISolver::exchange_halos() {
     // TODO: Implement blocking halo exchange
@@ -82,16 +124,41 @@ void MPISolver::exchange_halos() {
 }
 
 void MPISolver::exchange_halos_nonblocking() {
-    // TODO: Implement non-blocking halo exchange
-    // Use MPI_Isend and MPI_Irecv with MPI_Waitall
-    // This allows overlap of communication and computation
-    
     MPI_Request requests[8];
     int req_count = 0;
+
+    // 1. POSTER LES RÉCEPTIONS (Irecv)
+    // Gauche (0) et Droite (1) utilisent les buffers
+    MPI_Irecv(recv_buffer_left, local_ny - 2, MPI_DOUBLE, neighbors[0], 0, cart_comm, &requests[req_count++]);
+    MPI_Irecv(recv_buffer_right, local_ny - 2, MPI_DOUBLE, neighbors[1], 1, cart_comm, &requests[req_count++]);
     
-    // Exchange with left and right neighbors
-    // Exchange with bottom and top neighbors
-    // Wait for all communications to complete
+    // Bas (2) et Haut (3) : on peut recevoir directement dans la grille car les données sont contiguës
+    MPI_Irecv(&(*local_grid_old)(1, 0), local_nx - 2, MPI_DOUBLE, neighbors[2], 2, cart_comm, &requests[req_count++]);
+    MPI_Irecv(&(*local_grid_old)(1, local_ny - 1), local_nx - 2, MPI_DOUBLE, neighbors[3], 3, cart_comm, &requests[req_count++]);
+
+    // 2. PRÉPARATION DES BUFFERS D'ENVOI (Pack)
+    // On extrait les colonnes gauche et droite qui ne sont pas contiguës en mémoire
+    for (int j = 1; j < local_ny - 1; ++j) {
+        send_buffer_left[j - 1] = (*local_grid_old)(1, j);
+        send_buffer_right[j - 1] = (*local_grid_old)(local_nx - 2, j);
+    }
+
+    // 3. POSTER LES ENVOIS (Isend)
+    MPI_Isend(send_buffer_left, local_ny - 2, MPI_DOUBLE, neighbors[0], 1, cart_comm, &requests[req_count++]);
+    MPI_Isend(send_buffer_right, local_ny - 2, MPI_DOUBLE, neighbors[1], 0, cart_comm, &requests[req_count++]);
+    
+    // Envoi direct pour Bas et Haut
+    MPI_Isend(&(*local_grid_old)(1, 1), local_nx - 2, MPI_DOUBLE, neighbors[2], 3, cart_comm, &requests[req_count++]);
+    MPI_Isend(&(*local_grid_old)(1, local_ny - 2), local_nx - 2, MPI_DOUBLE, neighbors[3], 2, cart_comm, &requests[req_count++]);
+
+    // 4. ATTENDRE LA FIN DES COMMUNICATIONS
+    MPI_Waitall(req_count, requests, MPI_STATUSES_IGNORE);
+
+    // 5. REMPLIR LA GRILLE AVEC LES DONNÉES REÇUES (Unpack)
+    for (int j = 1; j < local_ny - 1; ++j) {
+        (*local_grid_old)(0, j) = recv_buffer_left[j - 1];
+        (*local_grid_old)(local_nx - 1, j) = recv_buffer_right[j - 1];
+    }
 }
 
 void MPISolver::time_step() {

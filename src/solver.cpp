@@ -62,18 +62,20 @@ void Solver::initialize(const SimulationParams& params) {
 }
 
 void Solver::run(int num_steps) {
-    total_timer.start();
+    total_timer.start();// lancer le chrono
+    computation_timer.start();
     
     for (int step = 0; step < num_steps; step++) {
-        computation_timer.start();
-        time_step();
         
-        computation_timer.stop();
+        time_step();// appel de la fonction avec OpenMP
+        
+        
         // Swap grids
         T_old->swap(*T_new);
     }
+    computation_timer.stop();
     
-    total_timer.stop();
+    total_timer.stop(); // arrêter le chrono
 }
 
 void Solver::report_timing() const {

@@ -1,6 +1,8 @@
 #ifndef SOLVER_H
 #define SOLVER_H
-
+#ifdef USE_MPI
+#include <mpi.h> 
+#endif
 #include "grid.h"
 #include "boundary.h"
 #include "timer.h"

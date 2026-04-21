@@ -20,10 +20,12 @@ void OpenMPSolver::time_step() {
     #pragma omp parallel for collapse(2) schedule(static)
     for (int i = 1; i < nx-1; i++) {
         for (int j = 1; j < ny-1; j++) {
+            // on stocke la valeur centrale pour éviter de la rechercher deux fois
+            double center = (*T_old)(i,j);
             // TODO: Implement stencil computation
-            (*T_new)(i, j) = (*T_old)(i, j) + factor * (
+            (*T_new)(i, j) = center + factor * (
                 (*T_old)(i - 1, j) + (*T_old)(i + 1, j) + 
-                (*T_old)(i, j - 1) + (*T_old)(i, j + 1) - 4.0 * (*T_old)(i, j)
+                (*T_old)(i, j - 1) + (*T_old)(i, j + 1) - 4.0 * center
             );
         }
 

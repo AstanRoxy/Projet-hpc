@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
+
+# j'ai la version cmake version 4.3.1
+
+
+
+
 project(HeatDiffusion LANGUAGES CXX)
 
 # Set C++ standard
@@ -12,7 +18,16 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Find required packages
-#find_package(MPI REQUIRED)
+option(USE_MPI "Activer le support MPI" OFF)
+
+if(USE_MPI)
+    find_package(MPI REQUIRED)
+    if(NOT MPI_FOUND)
+        message(FATAL_ERROR "MPI demandé mais non trouvé")
+    endif()
+endif()
+
+
 # On essaie de trouver OpenMP, mais si ça échoue, on force les drapeaux
 find_package(OpenMP)
 if(NOT OpenMP_CXX_FOUND)
@@ -30,6 +45,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 set(COMMON_COMPILE_OPTIONS -Wall -Wextra -O3 -march=native -ffast-math)
 add_compile_options(${COMMON_COMPILE_OPTIONS})
 
+
 # Source files
 set(COMMON_SOURCES
     src/solver.cpp
@@ -46,6 +62,9 @@ set(COMMON_HEADERS
     include/config.h
     include/solver.h
 )
+if(USE_MPI)
+    set(COMMON_SOURCES ${COMMON_SOURCES} src/solver_mpi.cpp)
+endif()
 
 # ============================================
 # Sequential version
@@ -57,7 +76,7 @@ add_executable(heat_seq
 )
 
 target_compile_definitions(heat_seq PRIVATE SEQUENTIAL)
-target_link_libraries(heat_seq)
+##target_link_libraries(heat_seq MPI_CXX)
 
 # ============================================
 # OpenMP version
@@ -74,20 +93,31 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(heat_omp PRIVATE OpenMP::OpenMP_CXX)
 else()
     target_compile_options(heat_omp PRIVATE -fopenmp)
-    target_link_libraries(heat_omp PRIVATE gomp)
+   target_link_libraries(heat_omp PRIVATE gomp)
 endif()
+
+##if(MPI_FOUND)
+  ##  target_link_libraries(heat_omp MPI::MPI_CXX)
+##else()
+   ## target_compile_options(heat_omp PRIVATE -fopenmp)
+   ## target_link_libraries(heat_omp gomp)
+##endif()
 
 # ============================================
 # MPI version
 # ============================================
-#add_executable(heat_mpi
-   # src/main.cpp
-    #src/solver_mpi.cpp
-    #${COMMON_SOURCES}
-#)
+if(USE_MPI)
+  add_executable(heat_mpi
+    src/main.cpp
+    src/solver_mpi.cpp
+    ${COMMON_SOURCES}
+)
+target_compile_definitions(heat_mpi PRIVATE USE_MPI)
+   ## target_include_directories(heat_mpi PRIVATE ${MPI_CXX_INCLUDE_DIRS})
+    target_link_libraries(heat_mpi PRIVATE MPI::MPI_CXX)
+    endif()
 
-#target_compile_definitions(heat_mpi PRIVATE USE_MPI)
-#target_link_libraries(heat_mpi ${MPI_CXX_LIBRARIES})
+
 
 # ============================================
 # Hybrid MPI+OpenMP version
@@ -110,15 +140,15 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/tests/test_sequential.cpp)
     target_link_libraries(test_seq)
 endif()
 
-#if(EXISTS ${CMAKE_SOURCE_DIR}/tests/test_mpi.cpp)
-    #add_executable(test_mpi tests/test_mpi.cpp src/solver_mpi.cpp ${COMMON_SOURCES})
-    #target_link_libraries(test_mpi ${MPI_CXX_LIBRARIES})
-#endif()
+##if(EXISTS ${CMAKE_SOURCE_DIR}/tests/test_mpi.cpp)
+    ##add_executable(test_mpi tests/test_mpi.cpp src/solver_mpi.cpp ${COMMON_SOURCES})
+    ##target_link_libraries(test_mpi PRIVATE ${MPI_CXX_LIBRARIES})
+##endif()
 
 # Installation (optional)
-#install(TARGETS heat_seq heat_omp heat_mpi heat_hybrid
-   # RUNTIME DESTINATION bin
-#)
+install(TARGETS heat_seq heat_omp heat_mpi #heat_hybrid
+   RUNTIME DESTINATION bin
+)
 
 # Print build summary
 message(STATUS "========================================")
@@ -131,3 +161,5 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/tests/test_sequential.cpp)
     message(STATUS "  Tests: test_seq")
 endif()
 message(STATUS "========================================")
+
+
