@@ -1,0 +1,292 @@
+#ifdef USE_MPI
+#include "solver.h"
+#include <mpi.h>
+#include <iostream>
+#include <cmath>
+
+MPISolver::MPISolver() : Solver(),
+    rank(-1), size(-1), 
+    local_grid_old(nullptr), local_grid_new(nullptr),
+    cart_comm(MPI_COMM_NULL),
+    send_buffer_left(nullptr), send_buffer_right(nullptr),
+    send_buffer_bottom(nullptr), send_buffer_top(nullptr),
+    recv_buffer_left(nullptr), recv_buffer_right(nullptr),
+    recv_buffer_bottom(nullptr), recv_buffer_top(nullptr) {
+    
+        //determiner le nombre de processeur
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+}
+
+MPISolver::~MPISolver() {
+    // TODO: Clean up allocated memory and MPI communicator
+    delete local_grid_old;
+    delete local_grid_new;
+    
+    delete[] send_buffer_left;
+    delete[] send_buffer_right;
+    delete[] send_buffer_bottom;
+    delete[] send_buffer_top;
+    delete[] recv_buffer_left;
+    delete[] recv_buffer_right;
+    delete[] recv_buffer_bottom;
+    delete[] recv_buffer_top;
+    
+    if (cart_comm != MPI_COMM_NULL) {
+        MPI_Comm_free(&cart_comm);
+    }
+}
+
+void MPISolver::setup_cartesian_communicator() {
+    // 1. Determine grid dimensions (dims[0] * dims[1] = size)
+    int dims[2] = {0, 0}; 
+    
+    // 2. Use MPI_Dims_create to create a balanced decomposition
+    MPI_Dims_create(size, 2, dims); 
+
+    // 3. Use MPI_Cart_create to create the communicator
+    int periods[2] = {0, 0}; 
+    MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 1, &cart_comm);
+
+    // 4. Use MPI_Cart_coords to get coordinates for this rank
+    MPI_Cart_coords(cart_comm, rank, 2, coords);
+
+    // 5. Use MPI_Cart_shift to find neighbors in each direction
+    MPI_Cart_shift(cart_comm, 0, 1, &neighbors[0], &neighbors[1]); // left, right
+    MPI_Cart_shift(cart_comm, 1, 1, &neighbors[2], &neighbors[3]); // bottom, top
+}
+
+
+void MPISolver::initialize(const SimulationParams& params) {
+    // 1. Store global dimensions
+
+    global_nx = params.Nx;
+    global_ny = params.Ny;
+
+    // 2. Set up Cartesian communicator (appel de la fonction ci-dessus)
+    setup_cartesian_communicator();
+
+    // 3. Récupérer les dimensions de la grille de processeurs
+    int dims[2], periods[2], coords[2];
+    MPI_Cart_get(cart_comm, 2, dims, periods, coords);
+
+    //// TODO : Gérer le reste pour le dernier processeur de chaque ligne/colonne
+
+    // 3. Calculate local grid dimensions (including halos)
+    local_nx = (global_nx / dims[0]) ; 
+    if (coords[0] == dims[0] - 1) local_nx += global_nx % dims[0];
+
+    local_ny = (global_ny / dims[1]) ;
+    if (coords[1] == dims[1] - 1) local_ny += global_ny % dims[1];//recuperer le reste au cas où la division ne tombe pas
+
+    local_nx += 2; // +2 for halos
+    local_ny += 2; // +2 for halos      
+
+    // 4. Allocate local grids
+    local_grid_old = new Grid(local_nx, local_ny);
+    local_grid_new = new Grid(local_nx, local_ny);
+
+
+    local_grid_old->fill(params.T_initial);
+
+    // 5. Initialize local grid with appropriate part of global initial condition
+
+   //// local_grid_old->fill(0.0);
+
+    // 6.Allocation de tous les buffeurs
+    send_buffer_left = new double[local_ny - 2];
+    send_buffer_right = new double[local_ny - 2];
+    recv_buffer_left = new double[local_ny - 2];
+    recv_buffer_right = new double[local_ny - 2];
+     send_buffer_bottom = new double[local_nx - 2];
+     send_buffer_top = new double[local_nx - 2];
+     recv_buffer_bottom = new double[local_nx - 2];
+     recv_buffer_top = new double[local_nx - 2];
+
+    // 7. Initialize base solver parameters
+    this->dx = params.Lx / params.Nx;
+    this->dy = params.Ly / params.Ny;
+    this->dt = 0.5 * (dx * dx) / params.alpha; // Condition de stabilité CFL
+    this->alpha = params.alpha;
+    this->factor = this->alpha * dt / (dx * dx); 
+}
+    
+   //// global_nx = params.Nx;
+   // //global_ny = params.Ny;
+    
+    ////setup_cartesian_communicator();
+    
+    // Calculate local dimensions including halos
+    // local_nx = (global_nx / dims[0]) + 2;  // +2 for halos
+    // local_ny = (global_ny / dims[1]) + 2;
+    
+    // Allocate local grids
+   //// local_grid_old = new Grid(local_nx, local_ny);
+   //// local_grid_new = new Grid(local_nx, local_ny);
+    
+    // Initialize local grid from global initial condition
+    // This requires mapping global indices to local indices
+    
+    // Allocate communication buffers
+    // send_buffer_left = new double[local_ny-2];
+    // etc.
+
+
+void MPISolver::exchange_halos() {
+    // TODO: Implement blocking halo exchange
+    // Use MPI_Sendrecv for each neighbor direction
+    // This is simpler but may have more waiting
+}
+
+void MPISolver::exchange_halos_nonblocking() {
+    MPI_Request requests[8];
+    int req_count = 0;
+
+    // 1. POSTER LES RÉCEPTIONS (Irecv)
+    // Gauche (0) et Droite (1) utilisent les buffers
+    MPI_Irecv(recv_buffer_left, local_ny - 2, MPI_DOUBLE, neighbors[0], 0, cart_comm, &requests[req_count++]);
+    MPI_Irecv(recv_buffer_right, local_ny - 2, MPI_DOUBLE, neighbors[1], 1, cart_comm, &requests[req_count++]);
+    
+    // Bas (2) et Haut (3) : on peut recevoir directement dans la grille car les données sont contiguës
+    MPI_Irecv(&(*local_grid_old)(1, 0), local_nx - 2, MPI_DOUBLE, neighbors[2], 2, cart_comm, &requests[req_count++]);
+    MPI_Irecv(&(*local_grid_old)(1, local_ny - 1), local_nx - 2, MPI_DOUBLE, neighbors[3], 3, cart_comm, &requests[req_count++]);
+
+    // 2. PRÉPARATION DES BUFFERS D'ENVOI (Pack)
+    // On extrait les colonnes gauche et droite qui ne sont pas contiguës en mémoire
+    for (int j = 1; j < local_ny - 1; ++j) {
+        send_buffer_left[j - 1] = (*local_grid_old)(1, j);
+        send_buffer_right[j - 1] = (*local_grid_old)(local_nx - 2, j);
+    }
+
+    // 3. POSTER LES ENVOIS (Isend)
+    MPI_Isend(send_buffer_left, local_ny - 2, MPI_DOUBLE, neighbors[0], 1, cart_comm, &requests[req_count++]);
+    MPI_Isend(send_buffer_right, local_ny - 2, MPI_DOUBLE, neighbors[1], 0, cart_comm, &requests[req_count++]);
+    
+    // Envoi direct pour Bas et Haut
+    MPI_Isend(&(*local_grid_old)(1, 1), local_nx - 2, MPI_DOUBLE, neighbors[2], 3, cart_comm, &requests[req_count++]);
+    MPI_Isend(&(*local_grid_old)(1, local_ny - 2), local_nx - 2, MPI_DOUBLE, neighbors[3], 2, cart_comm, &requests[req_count++]);
+
+    // 4. ATTENDRE LA FIN DES COMMUNICATIONS
+    MPI_Waitall(req_count, requests, MPI_STATUSES_IGNORE);
+
+    // 5. REMPLIR LA GRILLE AVEC LES DONNÉES REÇUES (Unpack)
+    for (int j = 1; j < local_ny - 1; ++j) {
+        (*local_grid_old)(0, j) = recv_buffer_left[j - 1];
+        (*local_grid_old)(local_nx - 1, j) = recv_buffer_right[j - 1];
+    }
+}
+
+void MPISolver::time_step() {
+    // TODO: Implement one MPI time step
+    
+    // 2. Update interior points (excluding halos)
+    
+    // 4. Swap local grids
+    
+    // 1. Exchange halo cells with neighbors
+    // Start communication timer
+    communication_timer.start();
+     // Exchange halos
+    exchange_halos_nonblocking();
+    communication_timer.stop();
+
+
+    ////2.Calcul de stencil sur la frille locale (en excluant les halos)
+    
+    // Start computation timer
+    computation_timer.start();
+    
+    // TODO: Update interior points (similar to sequential but on local grid)
+    // Be careful with indices: halos are at i=0, i=local_nx-1, j=0, j=local_ny-1
+
+    double check_sum = 0;
+
+    for (int i = 1; i < local_nx - 1; ++i) {
+        for (int j = 1; j < local_ny - 1; ++j) {
+            (*local_grid_new)(i, j) = (*local_grid_old)(i, j) + factor * (
+                (*local_grid_old)(i+1, j) + (*local_grid_old)(i-1, j) +
+                (*local_grid_old)(i, j+1) + (*local_grid_old)(i, j-1) - 
+                4.0 * (*local_grid_old)(i, j)
+            );
+            check_sum += (*local_grid_new)(i, j);
+        }
+    }
+    if (check_sum == -1234.5678) std::cout << check_sum; // Ligne qui ne s'exécutera jamais mais empêche l'optimisation
+     computation_timer.stop();
+     apply_physical_boundaries();
+} 
+  
+
+
+void MPISolver::apply_physical_boundary() {
+    // 3. Apply boundary conditions (only on physical boundaries)
+    int dims[2], periods[2], c[2];
+    MPI_Cart_get(cart_comm, 2, dims, periods, c);
+    
+    // Apply boundary conditions to physical boundaries only
+    // This requires knowing if this rank is on a global boundary
+    // if (coords[0] == 0) // left boundary
+    if (c[0] == 0) {
+        for (int j = 0; j < local_ny; ++j) (*local_grid_new)(1, j) = 100.0; // Exemple : 100°C
+    }
+    // if (coords[0] == dims[0]-1) // right boundary
+    if (c[0] == dims[0] - 1) {
+        for (int j = 0; j < local_ny; ++j) (*local_grid_new)(local_nx - 2, j) = 0.0; // Exemple : 0°C
+    }
+    // etc.
+}   
+
+void MPISolver::run(int num_steps) {
+    total_timer.start();
+    
+    for (int step = 0; step < num_steps; step++) {
+        time_step();
+        
+        // Swap grids
+        std::swap(local_grid_old, local_grid_new);
+    }
+    
+    total_timer.stop();
+    
+    // Gather results to rank 0 for output/validation
+    gather_results();
+}
+
+void MPISolver::gather_results() {
+    // TODO: Gather all local grids to rank 0
+    // This is for final validation and output only
+    // Not needed for performance measurements
+    
+    if (rank == 0) {
+        // Allocate global grid
+        // Receive from all ranks and assemble
+    } else {
+        // Send local grid to rank 0
+    }
+}
+
+void MPISolver::report_timing() const {
+    if (rank == 0) {
+        std::cout << "MPI Solver Timing:" << std::endl;
+        std::cout << "  Total: ";
+        total_timer.report();
+        std::cout << "  Computation: ";
+        computation_timer.report();
+        std::cout << "  Communication: ";
+        communication_timer.report();
+        std::cout << "  Communication ratio: " 
+                  << (communication_timer.elapsed() / total_timer.elapsed() * 100.0)
+                  << "%" << std::endl;
+        if (rank == 0) {
+    std::cout << "DEBUG MPI: global_nx=" << global_nx << " dims[0]=" << dims[0] << std::endl;
+    std::cout << "DEBUG MPI: local_nx=" << local_nx << " local_ny=" << local_ny << std::endl;
+    // AJOUTE CES LIGNES ICI POUR COMPRENDRE LE PROBLÈME
+        std::cout << "\n--- DEBUG MPI ---" << std::endl;
+        std::cout << "Local Nx: " << local_nx << " | Local Ny: " << local_ny << std::endl;
+        std::cout << "Factor: " << factor << std::endl;
+        std::cout << "-----------------\n" << std::endl;
+}
+    }
+}
+
+#endif // USE_MPI

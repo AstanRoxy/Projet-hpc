@@ -1,0 +1,20 @@
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 2048x2048, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.045117 seconds
+  Computation: Timer: 3.039273 seconds
+  Communication: Timer: 0.005665 seconds
+  Communication ratio: 0.186038%
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.951749 seconds
+  Computation: Timer: 3.859991 seconds
+  Communication: Timer: 0.091515 seconds
+  Communication ratio: 2.315803%

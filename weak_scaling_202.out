@@ -1,0 +1,22 @@
+--- TEST 1: 1 PROCESSUS (PETITE GRILLE) ---
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 2048x2048, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 2.999365 seconds
+  Computation: Timer: 2.993339 seconds
+  Communication: Timer: 0.005831 seconds
+  Communication ratio: 0.194406%
+--- TEST 2: 4 PROCESSUS (GRANDE GRILLE) ---
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.974953 seconds
+  Computation: Timer: 3.816680 seconds
+  Communication: Timer: 0.158093 seconds
+  Communication ratio: 3.977241%

@@ -18,7 +18,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Find required packages
-option(USE_MPI "Activer le support MPI" OFF)
+option(USE_MPI "Activer le support MPI" ON)
 
 if(USE_MPI)
     find_package(MPI REQUIRED)
@@ -122,14 +122,16 @@ target_compile_definitions(heat_mpi PRIVATE USE_MPI)
 # ============================================
 # Hybrid MPI+OpenMP version
 # ============================================
-#add_executable(heat_hybrid
-   # src/main.cpp
-    #src/solver_hybrid.cpp
-    #${COMMON_SOURCES}
-#)
+add_executable(heat_hybrid
+    src/main.cpp
+    src/solver_hybrid.cpp
+    ${COMMON_SOURCES}
+)
 
-#target_compile_definitions(heat_hybrid PRIVATE USE_MPI USE_OPENMP)
+target_compile_definitions(heat_hybrid PRIVATE USE_MPI USE_OPENMP)
 #target_link_libraries(heat_hybrid ${MPI_CXX_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(heat_hybrid PRIVATE MPI::MPI_CXX OpenMP::OpenMP_CXX)
+set_target_properties(heat_hybrid PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 # ============================================
 # Test executables
@@ -146,9 +148,13 @@ endif()
 ##endif()
 
 # Installation (optional)
-install(TARGETS heat_seq heat_omp heat_mpi #heat_hybrid
-   RUNTIME DESTINATION bin
-)
+install(TARGETS heat_seq heat_omp heat_mpi heat_hybrid RUNTIME DESTINATION bin)
+
+# On installe heat_mpi SEULEMENT s'il a été construit
+if(TARGET heat_mpi)
+    install(TARGETS heat_mpi RUNTIME DESTINATION bin)
+endif()
+
 
 # Print build summary
 message(STATUS "========================================")

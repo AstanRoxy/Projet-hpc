@@ -1,0 +1,24 @@
+TEST DE WEAK SCALING
+1 coeur, grille 2048x2048
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 2048x2048, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 2.991069 seconds
+  Computation: Timer: 2.985342 seconds
+  Communication: Timer: 0.005562 seconds
+  Communication ratio: 0.185949%
+------------------------------------------
+4 coeurs, grille 4096x4096
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.888836 seconds
+  Computation: Timer: 3.794371 seconds
+  Communication: Timer: 0.094300 seconds
+  Communication ratio: 2.424879%

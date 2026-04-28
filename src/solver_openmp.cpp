@@ -34,3 +34,17 @@ void OpenMPSolver::time_step() {
     // Apply boundary conditions (should not be parallelized)
     bc->apply(*T_new);
 }
+
+double OpenMPSolver::calculate_mean_temperature() {
+    double sum = 0.0;
+    int nx = T_old->get_nx();
+    int ny = T_old->get_ny();
+
+    #pragma omp parallel for reduction(+:sum)
+    for (int i = 0; i < nx; ++i) {
+        for (int j = 0; j < ny; ++j) {
+            sum += (*T_old)(i, j);
+        }
+    }
+    return sum / (nx * ny);
+}

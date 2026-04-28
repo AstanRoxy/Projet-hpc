@@ -1,4 +1,4 @@
-#ifdef USE_MPI && USE_OPENMP
+#if defined(USE_MPI) && defined(USE_OPENMP)
 #include "solver.h"
 #include <omp.h>
 #include <iostream>
@@ -17,28 +17,47 @@ void HybridSolver::time_step() {
     // 2. Parallelize interior update with OpenMP
     // 3. Apply boundary conditions
     
-    // Start communication timer
+    // 1. ÉCHANGE DES HALOS (MPI)
     communication_timer.start();
-    
-    // Exchange halos
+    // On lance l'échange des bords entre les différents processus
     exchange_halos_nonblocking();
-    
     communication_timer.stop();
-    
-    // Start computation timer
+
+
+  //  2. CALCUL DU STENCIL (OpenMP) - Intra-nœud
     computation_timer.start();
-    
-    int local_nx = local_grid_old->get_nx();
+
+    // On s'assure d'avoir les bonnes dimensions locales
+     int local_nx = local_grid_old->get_nx();
     int local_ny = local_grid_old->get_ny();
+
+
+    #pragma omp parallel for collapse(2) schedule(static)
+    for (int i = 1; i < local_nx - 1; ++i) { // Correction : utiliser local_nx
+        for (int j = 1; j < local_ny - 1; ++j) { // Correction : utiliser local_ny
+            double center = (*local_grid_old)(i, j);
+            (*local_grid_new)(i, j) = center + factor * (
+                (*local_grid_old)(i+1, j) + (*local_grid_old)(i-1, j) +
+                (*local_grid_old)(i, j+1) + (*local_grid_old)(i, j-1) - 
+                4.0 * center
+            );
+        }
+    }
+    
+    
+    // 3. CONDITIONS AUX LIMITES PHYSIQUES
+    // On applique les températures sur les bords réels (X=0, X=L, etc.)
+    apply_physical_boundary();
+   
     
     // TODO: Add OpenMP parallelization here
     // Be careful with collapse(2) and thread safety
-    #pragma omp parallel for collapse(2) schedule(static)
-    for (int i = 1; i < local_nx-1; i++) {
-        for (int j = 1; j < local_ny-1; j++) {
+    //#pragma omp parallel for collapse(2) schedule(static)
+    //for (int i = 1; i < local_nx-1; i++) {
+       // for (int j = 1; j < local_ny-1; j++) {
             // Update interior points
-        }
-    }
+       // }
+  //  }
     
     computation_timer.stop();
     

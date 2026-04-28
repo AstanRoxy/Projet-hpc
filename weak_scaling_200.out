@@ -1,0 +1,22 @@
+--- TEST 1: 1 COEUR, PETITE GRILLE ---
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 2048x2048, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.001456 seconds
+  Computation: Timer: 2.995334 seconds
+  Communication: Timer: 0.005917 seconds
+  Communication ratio: 0.197127%
+--- TEST 2: 4 COEURS, GRANDE GRILLE ---
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.975364 seconds
+  Computation: Timer: 3.713816 seconds
+  Communication: Timer: 0.261308 seconds
+  Communication ratio: 6.573177%

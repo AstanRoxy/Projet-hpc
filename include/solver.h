@@ -24,6 +24,7 @@ protected:
     Timer communication_timer;
     
 public:
+    virtual double calculate_mean_temperature() = 0;
     Solver();
     virtual ~Solver();
     
@@ -50,6 +51,7 @@ public:
 class SequentialSolver : public Solver {
 public:
     virtual void time_step() override;
+    virtual double calculate_mean_temperature() override;
 };
 
 // OpenMP solver
@@ -60,12 +62,13 @@ private:
 public:
     OpenMPSolver(int threads = 0);  // 0 = use default
     virtual void time_step() override;
+    virtual double calculate_mean_temperature() override;
 };
 
 // MPI solver (forward declaration - implementation in separate file)
 #ifdef USE_MPI
 class MPISolver : public Solver {
-private:
+protected:
     int rank, size;
     int coords[2];           // Cartesian coordinates
     int neighbors[4];        // Neighbor ranks (left, right, bottom, top)
@@ -85,6 +88,8 @@ private:
     double* recv_buffer_right;
     double* recv_buffer_bottom;
     double* recv_buffer_top;
+
+   
     
 public:
     MPISolver();
@@ -94,11 +99,15 @@ public:
     virtual void time_step() override;
     virtual void run(int num_steps) override;
     virtual void report_timing() const override;
+
+     virtual double calculate_mean_temperature() override;
     
-private:
+protected:
     void setup_cartesian_communicator();
     void exchange_halos();
     void exchange_halos_nonblocking();
+
+    void apply_physical_boundary();
     void gather_results();
 };
 

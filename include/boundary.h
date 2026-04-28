@@ -4,7 +4,7 @@
 #include "grid.h"
 
 class BoundaryConditions {
-private:
+public:
     int boundary_type;   // 0: Dirichlet, 1: Neumann
     double T_left, T_right, T_bottom, T_top;
     

@@ -13,7 +13,7 @@ void Timer::start() {
 
 void Timer::stop() {
     end_time = std::chrono::high_resolution_clock::now();
-    elapsed_seconds = std::chrono::duration<double>(end_time - start_time).count();
+    elapsed_seconds += std::chrono::duration<double>(end_time - start_time).count();
 }
 
 void Timer::reset() {

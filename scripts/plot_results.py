@@ -49,7 +49,7 @@ def plot_weak_scaling(csv_file):
     
     plt.tight_layout()
     plt.savefig('weak_scaling.png', dpi=150)
-    plt.show()
+    #plt.show()
 
 def main():
     if len(sys.argv) < 2:

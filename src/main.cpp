@@ -4,7 +4,7 @@
 #include "config.h"
 #include "solver.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)  {
     // Initialize MPI if needed
     #ifdef USE_MPI
     MPI_Init(&argc, &argv);
@@ -28,6 +28,11 @@ int main(int argc, char** argv) {
         #endif
         return 1;
     }
+
+    #ifdef USE_MPI
+    // Le Rang 0 envoie la structure params à tous les autres rangs
+    MPI_Bcast(&params, sizeof(SimulationParams), MPI_BYTE, 0, MPI_COMM_WORLD);
+    #endif
     
     // Create appropriate solver based on compilation flags
     Solver* solver = nullptr;
@@ -78,9 +83,14 @@ int main(int argc, char** argv) {
     }
     
     solver->run(params.num_steps);
+
+    double mean_temp = solver->calculate_mean_temperature();
+    if (rank == 0) {
+        std::cout << std::fixed << std::setprecision(6); // Pour voir les décimales
+        std::cout << "Final Mean Temperature: " << mean_temp << std::endl;
     
     // Report timing
-    if (rank == 0) {
+    
         solver->report_timing();
     }
     

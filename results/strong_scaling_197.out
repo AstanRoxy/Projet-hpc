@@ -1,0 +1,39 @@
+ERROR: Unable to locate a modulefile for 'openmpi'
+DEBUT DU TEST DE STRONG SCALING
+Taille de grille fixe : 4096 x 4096
+------------------------------------------
+Execution avec 1 processus MPI
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.294842
+MPI Solver Timing:
+  Total: Timer: 12.140895 seconds
+  Computation: Timer: 12.129096 seconds
+  Communication: Timer: 0.011612 seconds
+  Communication ratio: 0.095646%
+------------------------------------------
+Execution avec 2 processus MPI
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.294842
+MPI Solver Timing:
+  Total: Timer: 7.970896 seconds
+  Computation: Timer: 7.862765 seconds
+  Communication: Timer: 0.107984 seconds
+  Communication ratio: 1.354730%
+------------------------------------------
+Execution avec 4 processus MPI
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.296044
+MPI Solver Timing:
+  Total: Timer: 4.029877 seconds
+  Computation: Timer: 3.827384 seconds
+  Communication: Timer: 0.202281 seconds
+  Communication ratio: 5.019538%

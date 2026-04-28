@@ -5,8 +5,9 @@
 #include <cmath>
 
 MPISolver::MPISolver() : Solver(),
-    rank(-1), size(-1), cart_comm(MPI_COMM_NULL),
+    rank(-1), size(-1), 
     local_grid_old(nullptr), local_grid_new(nullptr),
+    cart_comm(MPI_COMM_NULL),
     send_buffer_left(nullptr), send_buffer_right(nullptr),
     send_buffer_bottom(nullptr), send_buffer_top(nullptr),
     recv_buffer_left(nullptr), recv_buffer_right(nullptr),
@@ -76,11 +77,18 @@ void MPISolver::initialize(const SimulationParams& params) {
     // 4. Allocate local grids
     local_grid_old = new Grid(local_nx, local_ny);
     local_grid_new = new Grid(local_nx, local_ny);
+
     local_grid_old->fill(params.T_initial);
 
     // 5. Initialize local grid with appropriate part of global initial condition
 
-    local_grid_old->fill(0.0);
+    local_grid_new->fill(params.T_initial);
+
+    if (this->bc != nullptr) {
+        delete this->bc; // On nettoie l'ancien au cas où
+    }
+
+    this->bc = new BoundaryConditions(0, params.T_left, params.T_right, params.T_bottom, params.T_top);
 
     // 6. Allocate send/receive buffers (pour les colonnes non contiguës)
     send_buffer_left = new double[local_ny - 2];
@@ -91,7 +99,7 @@ void MPISolver::initialize(const SimulationParams& params) {
     // 7. Initialize base solver parameters
     this->dx = params.Lx / params.Nx;
     this->dy = params.Ly / params.Ny;
-    this->dt = 0.5 * (dx * dx) / params.alpha; // Condition de stabilité CFL
+    this->dt = 0.25 * (dx * dx) / params.alpha; // Condition de stabilité CFL
     this->alpha = params.alpha;
     this->factor = this->alpha * dt / (dx * dx); 
 }
@@ -175,21 +183,57 @@ void MPISolver::time_step() {
     exchange_halos_nonblocking();
     
     communication_timer.stop();
+
+    
     
     // Start computation timer
     computation_timer.start();
     
     // TODO: Update interior points (similar to sequential but on local grid)
     // Be careful with indices: halos are at i=0, i=local_nx-1, j=0, j=local_ny-1
+    for (int i = 1; i < local_nx - 1; ++i) {
+        for (int j = 1; j < local_ny - 1; ++j) {
+            (*local_grid_new)(i, j) = (*local_grid_old)(i, j) + factor * (
+                (*local_grid_old)(i+1, j) + (*local_grid_old)(i-1, j) +
+                (*local_grid_old)(i, j+1) + (*local_grid_old)(i, j-1) - 
+                4.0 * (*local_grid_old)(i, j)
+            );
+        }
+    }
     
-    computation_timer.stop();
+    apply_physical_boundary();
+    computation_timer.stop();} 
     
     // Apply boundary conditions to physical boundaries only
     // This requires knowing if this rank is on a global boundary
     // if (coords[0] == 0) // left boundary
     // if (coords[0] == dims[0]-1) // right boundary
     // etc.
+    // --- APPLICATION DES CONDITIONS AUX LIMITES PHYSIQUES ---
+
+    void MPISolver::apply_physical_boundary() {
+    int dims[2], periods[2], coords_check[2];
+    MPI_Cart_get(cart_comm, 2, dims, periods, coords_check);
+
+    // Bord Gauche (X = 0)
+    if (coords_check[0] == 0) { 
+        for (int j = 0; j < local_ny; ++j) (*local_grid_new)(0, j) = bc->T_left;
+    }
+    // Bord Droit (X = max)
+    if (coords_check[0] == dims[0] - 1) { 
+        for (int j = 0; j < local_ny; ++j) (*local_grid_new)(local_nx-1, j) = bc->T_right;
+    }
+
+    // Bord Bas (Y = 0) -> On fixe la ligne j = 0
+    if (coords_check[1] == 0) { 
+        for (int i = 0; i < local_nx; ++i) (*local_grid_new)(i, 0) = bc->T_bottom;
+    }
+    // Bord Haut (Y = max) -> On fixe la ligne j = local_ny - 1
+    if (coords_check[1] == dims[1] - 1) { 
+        for (int i = 0; i < local_nx; ++i) (*local_grid_new)(i, local_ny - 1) = bc->T_top;
+    }
 }
+    
 
 void MPISolver::run(int num_steps) {
     total_timer.start();
@@ -235,4 +279,28 @@ void MPISolver::report_timing() const {
     }
 }
 
+// ... après report_timing() ...
+
+double MPISolver::calculate_mean_temperature() {
+    double local_sum = 0.0;
+    // On somme uniquement les points réels (on ignore les halos)
+    for (int i = 1; i < local_nx - 1; ++i) {
+        for (int j = 1; j < local_ny - 1; ++j) {
+            local_sum += (*local_grid_old)(i, j);
+        }
+    }
+
+    double global_sum = 0.0;
+    // Réduction : somme de tous les local_sum vers global_sum sur le rang 0
+    MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, cart_comm);
+
+    if (rank == 0) {
+        // global_nx et global_ny viennent des paramètres stockés lors de l'initialisation
+        return global_sum / (double)(global_nx * global_ny);
+    }
+    return 0.0;
+}
+
+
 #endif // USE_MPI
+// Test écriture

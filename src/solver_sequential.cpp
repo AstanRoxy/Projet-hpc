@@ -32,3 +32,16 @@ void SequentialSolver::time_step() {
         // 6. Le double Buffering (Le swap des étiquettes)
         //std::swap(T_old, T_new); // déjà dan ssolver.cpp
 }
+
+double SequentialSolver::calculate_mean_temperature() {
+    double sum = 0.0;
+    int nx = T_old->get_nx();
+    int ny = T_old->get_ny();
+
+    for (int i = 0; i < nx; ++i) {
+        for (int j = 0; j < ny; ++j) {
+            sum += (*T_old)(i, j);
+        }
+    }
+    return sum / (nx * ny);
+}

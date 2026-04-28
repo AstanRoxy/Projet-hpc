@@ -1,0 +1,22 @@
+--- TEST 1: 1 COEUR (CHARGE NORMALE) ---
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 2048x2048, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 2.988882 seconds
+  Computation: Timer: 2.982999 seconds
+  Communication: Timer: 0.005668 seconds
+  Communication ratio: 0.189640%
+--- TEST 2: 4 COEURS (CHARGE QUADRUPLEE) ---
+Authorization required, but no authorization protocol specified
+Authorization required, but no authorization protocol specified
+Using MPI solver
+Running simulation with grid 4096x4096, 500 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 3.912224 seconds
+  Computation: Timer: 3.820096 seconds
+  Communication: Timer: 0.091961 seconds
+  Communication ratio: 2.350609%

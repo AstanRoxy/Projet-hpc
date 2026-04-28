@@ -1,0 +1,8 @@
+Using MPI solver
+Running simulation with grid 512x512, 1000 time steps
+Final Mean Temperature: 0.000000
+MPI Solver Timing:
+  Total: Timer: 0.122038 seconds
+  Computation: Timer: 0.048826 seconds
+  Communication: Timer: 0.073111 seconds
+  Communication ratio: 59.907945%
